@@ -1,0 +1,25 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 443:443
+    volumes:
+      - ./html:/etc/nginx/html:delegated
+      - ./nginx/conf.d:/etc/nginx/conf.d:delegated
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:delegated
+      - ./ssl:/etc/ssl:delegated
+      - ./client_certs:/etc/nginx/client_certs:delegated
+    networks:
+      - kool_local
+      - kool_global
+
+volumes:
+  nginx:
+
+networks:
+  kool_local:
+  kool_global:
+    external: true
+    name: ${KOOL_GLOBAL_NETWORK:-kool_global}
