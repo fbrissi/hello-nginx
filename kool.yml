@@ -1,12 +1,29 @@
 scripts:
+  text: openssl x509 -text -noout -in
   verify-client: openssl verify -verbose -CAfile ./client/ca.crt ./client/client.crt
   verify-server: openssl verify -verbose -CAfile ./client_certs/ca.crt ./client/client.crt
   secure: curl --verbose --insecure --cert ./client/client.crt --key ./client/client.key https://localhost/secure
   mtls-client:
-    - bash -c "cat ./client/mtls-client.json | jq -r .ca | base64 --decode | openssl x509 -inform DER -outform PEM -out ./client/ca.crt -in -"
-    - bash -c "cat ./client/mtls-client.json | jq -r .cert | base64 --decode | openssl x509 -inform DER -outform PEM -out ./client/client.crt -in -"
-    - bash -c "cat ./client/mtls-client.json | jq -r .key | base64 --decode | openssl rsa -inform DER -outform PEM -out ./client/client.key -in -"
+    - bash -c "rm -rf ./client/*.key ./client/*.crt"
+    - bash -c "cat ./client/mtls-client.json | jq -r .key | base64 --decode | openssl rsa -inform DER -outform PEM -out ./client/client.key -in - | true"
+    - bash -c "cat ./client/mtls-client.json | jq -r .cert | base64 --decode | openssl x509 -inform DER -outform PEM -out ./client/client.crt -in - | true"
+    - bash -c "cat ./client/mtls-client.json | jq -r .ca | base64 --decode | while openssl x509 -inform DER -outform PEM >> ./client/ca.crt; do :; done | true"
   mtls-server:
-    - bash -c "cat ./client/mtls-server.json | jq -r .ca | base64 --decode | openssl x509 -inform DER -outform PEM -out ./client/ca.crt -in -"
-    - bash -c "cat ./client/mtls-server.json | jq -r .cert | base64 --decode | openssl x509 -inform DER -outform PEM -out ./client/client.crt -in -"
-    - bash -c "cat ./client/mtls-server.json | jq -r .key | base64 --decode | openssl rsa -inform DER -outform PEM -out ./client/client.key -in -"
+    - bash -c "rm -rf ./client/*.key ./client/*.crt"
+    - bash -c "cat ./client/mtls-server.json | jq -r .key | base64 --decode | openssl rsa -inform DER -outform PEM -out ./client/client.key -in -  | true"
+    - bash -c "cat ./client/mtls-server.json | jq -r .cert | base64 --decode | openssl x509 -inform DER -outform PEM -out ./client/client.crt -in -  | true"
+    - bash -c "cat ./client/mtls-server.json | jq -r .ca | base64 --decode | while openssl x509 -inform DER -outform PEM >> ./client/ca.crt; do :; done  | true"
+  ca-openbanking:
+    - bash -c "rm -rf ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/RAIZ/ICP-Brasilv5.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/RAIZ/ICP-Brasilv10.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/CERTISIGN/v5/p/AC_Certisign_G7.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/CERTISIGN/v10/p/AC-CERTISIGN-ICP-BRASIL-SSL.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/CERTISIGN/v10/p/AC-CERTISIGN-ICP-BRASIL-SSL-G2.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SERASA_ACP/v10/p/Serasa_Autoridade_Certificadora_Principal_v5.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SERASA_ACP/v10/p/AC-SERASA-SSL-EV.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SERASA_ACP/v10/p/AC-SERASA-SSL-EV-V2.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SERPRO/v5/p/Autoridade_Certificadora_Serpro_v4.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SERPRO/v10/p/AC-SERPRO-SSLv1-v10.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SOLUTI/v5/p/AC_Soluti_v5.crt >> ./client_certs/ca.crt"
+    - bash -c "curl http://acraiz.icpbrasil.gov.br/credenciadas/SOLUTI/v10/p/AC-SOLUTI-SSL-EV.crt >> ./client_certs/ca.crt"
